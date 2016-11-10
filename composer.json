@@ -1,5 +1,6 @@
 {
     "name": "vagrant/rest-demo",
+    "description": "demo for implementing a rest service",
     "license": "proprietary",
     "type": "project",
     "autoload": {
