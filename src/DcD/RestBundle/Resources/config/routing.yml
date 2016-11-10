@@ -1,3 +1,4 @@
 basket:
     type: rest
     resource: DcD\RestBundle\Controller\BasketController
+
