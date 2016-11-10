@@ -49,7 +49,7 @@ class BasketController extends FOSRestController implements ClassResourceInterfa
     {
         $basket = new \DcD\RestBundle\Entity\Basket();
 
-        $form = $this->createForm( '\DcD\RestBundle\Form\BasketType', $basket );
+        $form = $this->createForm(\DcD\RestBundle\Form\Type\BasketType::class, $basket );
         $form->submit($request->get('basket'));
         $form->handleRequest( $request );
 
@@ -81,7 +81,7 @@ class BasketController extends FOSRestController implements ClassResourceInterfa
         $em = $this->getDoctrine()->getManager();
         $basket = $em->getRepository('RestBundle:Basket')->find($id);
 
-        $form = $this->createForm('\DcD\RestBundle\Form\BasketType', $basket);
+        $form = $this->createForm(\DcD\RestBundle\Form\Type\BasketType::class, $basket);
         $form->submit( $request->get('basket'), false );
 
         if ($form->isValid()) {
