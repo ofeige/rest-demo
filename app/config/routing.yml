@@ -1,0 +1,8 @@
+rest:
+    resource: "@RestBundle/Controller/"
+    type:     annotation
+    prefix:   /
+
+check24:
+    type: rest
+    resource: "@RestBundle/Resources/config/routing.yml"
