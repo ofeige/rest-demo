@@ -24,7 +24,7 @@ class BasketItem
     private $id;
 
     /**
-     * @ManyToOne(targetEntity="Basket", inversedBy="BasketItem")
+     * @ManyToOne(targetEntity="Basket", inversedBy="basketItems")
      * @JoinColumn(name="basket_id", referencedColumnName="id", onDelete="cascade")
      */
     private $basket;
