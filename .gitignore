@@ -14,7 +14,5 @@
 !var/SymfonyRequirements.php
 /vendor/
 /web/bundles/
-.DS_Store
-.idea/
-/bin/
+!/bin/console
 /composer.phar
