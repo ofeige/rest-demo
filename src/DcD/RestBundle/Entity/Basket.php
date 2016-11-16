@@ -4,6 +4,7 @@ namespace DcD\RestBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OneToMany;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -11,6 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @ORM\Table(name="basket")
  * @ORM\Entity(repositoryClass="DcD\RestBundle\Repository\BasketRepository")
+ * @UniqueEntity("uuid")
  */
 class Basket
 {
@@ -28,6 +30,8 @@ class Basket
      *
      * @ORM\Column(name="user_id", type="integer")
      * @Assert\NotBlank(message="userId is missing")
+     * @Assert\Type(type="integer")
+     * @Assert\GreaterThan(0)
      */
     private $userId;
 
@@ -40,7 +44,7 @@ class Basket
     private $uuid;
 
     /**
-     * @OneToMany(targetEntity="BasketItem", mappedBy="basket")
+     * @OneToMany(targetEntity="BasketItem", mappedBy="basket", fetch="EXTRA_LAZY")
      */
     private $basketItems;
 
