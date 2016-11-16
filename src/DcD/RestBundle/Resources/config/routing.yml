@@ -2,3 +2,6 @@ basket:
     type: rest
     resource: DcD\RestBundle\Controller\BasketController
 
+basketitem:
+    type: rest
+    resource: DcD\RestBundle\Controller\BasketItemController
