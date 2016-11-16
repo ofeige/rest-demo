@@ -9,12 +9,13 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 
 class BasketController extends FOSRestController implements ClassResourceInterface
 {
     /**
-     * @Rest\View
+     * @Rest\View()
      */
     public function cgetAction()
     {
@@ -22,11 +23,11 @@ class BasketController extends FOSRestController implements ClassResourceInterfa
             ->getRepository('RestBundle:Basket')
             ->findAll();
 
-        return array('baskets' => $baskets);
+        return $baskets;
     }
 
     /**
-     * @Rest\View
+     * @Rest\View()
      */
     public function getAction($id)
     {
@@ -35,14 +36,14 @@ class BasketController extends FOSRestController implements ClassResourceInterfa
             ->find($id);
 
         if (!$basket instanceof Basket) {
-            throw new NotFoundHttpException('Basket not found');
+            throw $this->createNotFoundException('Basket not found');
         }
 
         return array('baskets' => $basket);
     }
 
     /**
-     * @Rest\View
+     * @Rest\View()
      * @ParamConverter("basket", class="array", converter="fos_rest.request_body")
      */
     public function postAction(Request $request)
@@ -58,18 +59,10 @@ class BasketController extends FOSRestController implements ClassResourceInterfa
             $em->persist( $basket );
             $em->flush();
 
-            return $this->redirectView(
-                $this->generateUrl(
-                    'get_basket',
-                    array( 'id' => $basket->getId() )
-                ),
-                \Symfony\Component\HttpFoundation\Response::HTTP_CREATED
-            );
+            return $this->view($basket, \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
         }
 
-        return array(
-            'errors' => $form->getErrors()
-        );
+        return $form;
     }
 
     /**
@@ -85,21 +78,13 @@ class BasketController extends FOSRestController implements ClassResourceInterfa
         $form->submit( $request->get('basket'), false );
 
         if ($form->isValid()) {
-            $em->persist($form->getData());
+            $em->persist($basket);
             $em->flush();
 
-            return $this->redirectView(
-                $this->generateUrl(
-                    'get_basket',
-                    array( 'id' => $basket->getId() )
-                ),
-                \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED
-            );
+            return $this->view($basket, \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
         }
 
-        return array(
-            'errors' => $form->getErrors()
-        );
+        return $form;
     }
     /**
      * @Rest\View()
@@ -113,6 +98,5 @@ class BasketController extends FOSRestController implements ClassResourceInterfa
         $em->flush();
 
         return $this->view(null, \Symfony\Component\HttpFoundation\Response::HTTP_NO_CONTENT);
-
     }
 }
