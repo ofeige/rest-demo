@@ -3,6 +3,6 @@ rest:
     type:     annotation
     prefix:   /
 
-check24:
+DcD:
     type: rest
     resource: "@RestBundle/Resources/config/routing.yml"
