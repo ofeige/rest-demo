@@ -1,6 +1,7 @@
 <?php
 
 namespace DcD\RestBundle\Repository;
+use Doctrine\ORM\AbstractQuery;
 
 /**
  * BasketRepository
@@ -10,4 +11,44 @@ namespace DcD\RestBundle\Repository;
  */
 class BasketRepository extends \Doctrine\ORM\EntityRepository
 {
+    /**
+     * Get all basket + basketItems
+     * implemented to get FieldNames instead EntityName
+     * and to run only one query instead of many more
+     *
+     * @return array
+     */
+    public function getBaskets()
+    {
+        return $this->getEntityManager()->createQuery('
+            SELECT 
+               b, bi
+            FROM 
+              RestBundle:Basket b 
+              LEFT JOIN b.basketItems bi  
+            
+         ')
+            ->getResult(AbstractQuery::HYDRATE_ARRAY);
+    }
+
+    /**
+     * Get one complete basket + basketItems
+     * implemented to get FieldNames instead EntityName
+     *
+     * @param $basketId
+     * @return array
+     */
+    public function getBasket($basketId)
+    {
+        return $this->getEntityManager()->createQuery('
+            SELECT 
+               b, bi
+            FROM 
+              RestBundle:Basket b 
+              LEFT JOIN b.basketItems bi  
+            WHERE 
+              b.id = :id
+         ')
+            ->setParameter('id', $basketId)->getOneOrNullResult(AbstractQuery::HYDRATE_ARRAY);
+    }
 }
