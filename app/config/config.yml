@@ -107,4 +107,4 @@ fos_http_cache:
                     overwrite: false
                     cache_control: { public: true, max_age: 15, s_maxage: 30 }
                     etag: false
-                    
+
