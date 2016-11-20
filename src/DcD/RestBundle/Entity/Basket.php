@@ -2,6 +2,7 @@
 
 namespace DcD\RestBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OneToMany;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -28,7 +29,7 @@ class Basket
     /**
      * @var int
      *
-     * @ORM\Column(name="user_id", type="integer")
+     * @ORM\Column(type="integer")
      * @Assert\NotBlank(message="userId is missing")
      * @Assert\Type(type="integer")
      * @Assert\GreaterThan(0)
@@ -111,17 +112,17 @@ class Basket
      */
     public function __construct()
     {
-        $this->basketItems = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->basketItems = new ArrayCollection();
     }
 
     /**
      * Add basketItem
      *
-     * @param \DcD\RestBundle\Entity\BasketItem $basketItem
+     * @param BasketItem $basketItem
      *
      * @return Basket
      */
-    public function addBasketItem(\DcD\RestBundle\Entity\BasketItem $basketItem)
+    public function addBasketItem(BasketItem $basketItem)
     {
         $this->basketItems[] = $basketItem;
 
@@ -131,9 +132,9 @@ class Basket
     /**
      * Remove basketItem
      *
-     * @param \DcD\RestBundle\Entity\BasketItem $basketItem
+     * @param BasketItem $basketItem
      */
-    public function removeBasketItem(\DcD\RestBundle\Entity\BasketItem $basketItem)
+    public function removeBasketItem(BasketItem $basketItem)
     {
         $this->basketItems->removeElement($basketItem);
     }
