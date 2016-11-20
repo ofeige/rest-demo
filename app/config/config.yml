@@ -88,3 +88,22 @@ fos_rest:
         view_response_listener: 'force'
     routing_loader:
         default_format: json
+
+fos_http_cache:
+    tags:
+        enabled: true
+    proxy_client:
+        varnish:
+            servers: 127.0.0.1:6081
+            base_url: rest-demo:8080
+    cache_control:
+        defaults:
+            overwrite: true
+        rules:
+            -
+                match:
+                    path: ^/
+                headers:
+                    overwrite: false
+                    cache_control: { public: true, max_age: 15, s_maxage: 30 }
+                    etag: false
