@@ -6,12 +6,8 @@ use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
-class BasketControllerTest extends WebTestCase
+class BasketItemControllerTest extends WebTestCase
 {
-    public function setUp()
-    {
-        $this->content = array();
-    }
 
     public function testPost()
     {
@@ -30,121 +26,171 @@ class BasketControllerTest extends WebTestCase
             [],
             '{"userId": '.$userId.',"uuid": "'.$uuid->toString().'"}'
         );
+        $basket = json_decode($client->getResponse()->getContent(), true);
 
-        $content = json_decode($client->getResponse()->getContent(), true);
-
-        $this->assertJsonResponse($client->getResponse(), 201);
-        $this->assertArrayHasKey('id', $content);
-        $this->assertArrayHasKey('userId', $content);
-        $this->assertEquals($content['userId'], $userId);
-        $this->assertArrayHasKey('uuid', $content);
-        $this->assertEquals($content['uuid'], $uuid);
-        $this->assertArrayHasKey('basketItems', $content);
-
-        // save information for delete test
-        return $content;
-    }
-
-    /**
-     * @depends testPost
-     * @param array $content
-     * @return array|mixed
-     */
-    public function testPut(array $content)
-    {
         $client = static::createClient([], ['HTTP_HOST' => 'rest-demo:8080']);
         $client->setServerParameter('CONTENT_TYPE', 'application/json');
         $client->setServerParameter('HTTP_accept', 'application/json');
 
         $userId = rand(1,99);
+        $uuid = Uuid::uuid4();
+
         $client->request(
-            'PUT',
-            '/baskets/'.$content['id'],
+            'POST',
+            '/baskets/'.$basket['id'].'/items',
             [],
             [],
             [],
-            '{"userId": '.$userId.'}'
+            '{"info":{"product_id":12345,"titel":"Kern Tischwaage"}}'
         );
 
         $content = json_decode($client->getResponse()->getContent(), true);
 
-        $this->assertJsonResponse($client->getResponse(), 202);
-        $this->assertArrayHasKey('id', $content);
-        $this->assertArrayHasKey('userId', $content);
-        $this->assertEquals($content['userId'], $userId);
-        $this->assertArrayHasKey('uuid', $content);
-        $this->assertArrayHasKey('basketItems', $content);
+        $this->assertJsonResponse($client->getResponse(), 201);
+        $this->assertArrayHasKey('id', $content[0]);
+        $this->assertArrayHasKey('info', $content[0]);
 
-        return $content;
+        // save information for delete test
+        return [$basket['id'], $content];
     }
 
-    public function testCget()
+//    /**
+//     * @depends testPost
+//     * @param array $content
+//     * @return array|mixed
+//     */
+//    public function testPut(array $data)
+//    {
+//        $basketId = $data[0];
+//        $basketItem = $data[1];
+//
+//        $client = static::createClient([], ['HTTP_HOST' => 'rest-demo:8080']);
+//        $client->setServerParameter('CONTENT_TYPE', 'application/json');
+//        $client->setServerParameter('HTTP_accept', 'application/json');
+//
+//        $info = ['product_id'=>rand(10000,99999), 'title'=>'BMW X6'];
+//        $client->request(
+//            'PUT',
+//            sprintf('/baskets/%s/items/%s', $basketId, $basketItem[0]['id']),
+//            [],
+//            [],
+//            [],
+//            $info
+//        );
+//        print_r($client->getRequest()->getBaseUrl());
+//
+//        $content = json_decode($client->getResponse()->getContent(), true);
+//
+//        //print_r($content);
+//        $this->assertJsonResponse($client->getResponse(), 202);
+//        $this->assertArrayHasKey('id', $content);
+//        $this->assertArrayHasKey('userId', $content);
+//        $this->assertEquals($content['userId'], $userId);
+//        $this->assertArrayHasKey('uuid', $content);
+//        $this->assertArrayHasKey('basketItems', $content);
+//
+//        return $content;
+//    }
+
+    /**
+     * @depends testPost
+     * @return mixed
+     */
+    public function testCget(array $info)
     {
+        $basketId = $info[0];
+        $basketItem = $info[1];
+
         $client = static::createClient();
         $client->setServerParameter('HTTP_HOST', 'rest-demo:8080');
 
-        $client->request('GET', '/baskets');
+        $client->request('GET', sprintf('/baskets/%s/items',
+            $basketId
+        ));
         $content = json_decode($client->getResponse()->getContent(), true);
+        $content = $content[0];
 
         $this->assertJsonResponse($client->getResponse(), 200);
-        $this->assertGreaterThanOrEqual(2, count($content));
-        $this->assertArrayHasKey('id', $content[0]);
-        $this->assertArrayHasKey('userId', $content[0]);
-        $this->assertArrayHasKey('uuid', $content[0]);
-        $this->assertArrayHasKey('basketItems', $content[0]);
-
-        $client->request('GET', '/baskets.json');
-        $content = json_decode($client->getResponse()->getContent(), true);
-
-        $this->assertJsonResponse($client->getResponse(), 200);
-        $this->assertGreaterThanOrEqual(2, count($content));
-        $this->assertArrayHasKey('id', $content[0]);
-        $this->assertArrayHasKey('userId', $content[0]);
-        $this->assertArrayHasKey('uuid', $content[0]);
-        $this->assertArrayHasKey('basketItems', $content[0]);
-
-    }
-
-    public function testGet()
-    {
-        $client = static::createClient();
-        $client->setServerParameter('HTTP_HOST', 'rest-demo:8080');
-
-        $client->request('GET', '/baskets/1');
-        $content = json_decode($client->getResponse()->getContent(), true);
-
-        $this->assertJsonResponse($client->getResponse(), 200);
-        $this->assertGreaterThanOrEqual(2, count($content));
+        $this->assertEquals(2, count($content));
         $this->assertArrayHasKey('id', $content);
-        $this->assertArrayHasKey('userId', $content);
-        $this->assertArrayHasKey('uuid', $content);
-        $this->assertArrayHasKey('basketItems', $content);
+        $this->assertEquals($basketItem[0]['id'], $content['id']);
+        $this->assertArrayHasKey('info', $content);
 
-        $client->request('GET', '/baskets/1.json');
+        $client->request('GET', sprintf('/baskets/%s/items.json',
+            $basketId
+        ));
         $content = json_decode($client->getResponse()->getContent(), true);
+        $content = $content[0];
 
         $this->assertJsonResponse($client->getResponse(), 200);
-        $this->assertGreaterThanOrEqual(2, count($content));
+        $this->assertEquals(2, count($content));
         $this->assertArrayHasKey('id', $content);
-        $this->assertArrayHasKey('userId', $content);
-        $this->assertArrayHasKey('uuid', $content);
-        $this->assertArrayHasKey('basketItems', $content);
+        $this->assertEquals($basketItem[0]['id'], $content['id']);
+        $this->assertArrayHasKey('info', $content);
 
         $client->request('GET', '/baskets/0.json');
         $this->assertJsonResponse($client->getResponse(), 404);
 
+        return $info;
     }
 
     /**
-     * @depends testPut
-     * @param $content
+     * @depends testCget
      */
-    public function testDelete(array $content)
+    public function testGet($info)
     {
+        $basketId = $info[0];
+        $basketItem = $info[1];
+
         $client = static::createClient();
         $client->setServerParameter('HTTP_HOST', 'rest-demo:8080');
 
-        $client->request('DELETE', '/baskets/'.$content['id']);
+        $client->request('GET', sprintf('/baskets/%s/items/%s',
+            $basketId,
+            $basketItem[0]['id']
+        ));
+        $content = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertJsonResponse($client->getResponse(), 200);
+        $this->assertEquals(2, count($content));
+        $this->assertArrayHasKey('id', $content);
+        $this->assertEquals($basketItem[0]['id'], $content['id']);
+        $this->assertArrayHasKey('info', $content);
+
+        $client->request('GET', sprintf('/baskets/%s/items/%s.json',
+            $basketId,
+            $basketItem[0]['id']
+            ));
+        $content = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertJsonResponse($client->getResponse(), 200);
+        $this->assertEquals(2, count($content));
+        $this->assertArrayHasKey('id', $content);
+        $this->assertEquals($basketItem[0]['id'], $content['id']);
+        $this->assertArrayHasKey('info', $content);
+
+        $client->request('GET', '/baskets/0.json');
+        $this->assertJsonResponse($client->getResponse(), 404);
+
+        return $info;
+    }
+
+    /**
+     * @depends testGet
+     * @param $content
+     */
+    public function testDelete(array $info)
+    {
+        $basketId = $info[0];
+        $basketItem = $info[1];
+
+        $client = static::createClient();
+        $client->setServerParameter('HTTP_HOST', 'rest-demo:8080');
+
+        $client->request('DELETE', sprintf('/baskets/%s/items/%s',
+            $basketId,
+            $basketItem[0]['id']
+        ));
         $content = json_decode($client->getResponse()->getContent(), true);
 
         $this->assertJsonResponse($client->getResponse(), 204);
@@ -152,13 +198,15 @@ class BasketControllerTest extends WebTestCase
         $client = static::createClient();
         $client->setServerParameter('HTTP_HOST', 'rest-demo:8080');
 
-        $client->request('GET', '/baskets/'.$content['id']);
+        $client->request('GET', sprintf('/baskets/%s/items/%s',
+            $basketId,
+            $basketItem[0]['id']
+        ));
         $content = json_decode($client->getResponse()->getContent(), true);
 
         $this->assertJsonResponse($client->getResponse(), 404);
 
     }
-
 
     protected function assertJsonResponse(Response $response, $statusCode = 200)
     {
