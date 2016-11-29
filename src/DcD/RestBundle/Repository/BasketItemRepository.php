@@ -1,6 +1,7 @@
 <?php
 
 namespace DcD\RestBundle\Repository;
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -23,11 +24,13 @@ class BasketItemRepository extends EntityRepository
         return $this->getEntityManager()->createQuery('
             SELECT 
               bi.id, 
-              bi.info 
+              bi.info
             FROM 
-              RestBundle:BasketItem bi 
+              RestBundle:BasketItem bi
+              JOIN bi.basket b
             WHERE 
-              bi.basket = :id
+              bi.basket = :id AND 
+              b.isDeleted = 0
          ')
             ->setParameter('id', $basketId)
             ->getResult();
@@ -48,10 +51,13 @@ class BasketItemRepository extends EntityRepository
               bi.info 
             FROM 
               RestBundle:BasketItem bi 
+              JOIN bi.basket b
             WHERE 
-              bi.id = :id
+              bi.id = :id AND 
+              bi.isDeleted = 0 AND
+              b.isDeleted = 0
          ')
             ->setParameter('id', $basketItemId)
-            ->getResult();
+            ->getOneOrNullResult(AbstractQuery::HYDRATE_ARRAY);
     }
 }

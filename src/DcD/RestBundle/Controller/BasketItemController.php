@@ -42,9 +42,13 @@ class BasketItemController extends FOSRestController implements ClassResourceInt
      */
     public function getAction($basketId, $itemId)
     {
-        $items = $this->getBasketItemRepository()->getItem($itemId);
+        $item = $this->getBasketItemRepository()->getItem($itemId);
 
-        return $items;
+        if(empty($item)) {
+            throw $this->createNotFoundException('BasketItem not found');
+        }
+
+        return $item;
     }
 
     /**
@@ -73,8 +77,8 @@ class BasketItemController extends FOSRestController implements ClassResourceInt
             $em->flush();
 
             //avoid lazy loading
-            $basketItem->setBasket(NULL);
-            return $this->view($basketItem, Response::HTTP_CREATED);
+            //$basketItem->setBasket(NULL);
+            return $this->view($this->cgetAction($basketItem->getBasket()->getId()), Response::HTTP_CREATED);
         }
 
         return $form;
@@ -83,7 +87,7 @@ class BasketItemController extends FOSRestController implements ClassResourceInt
     /**
      * @Rest\View()
      * @Tag(expression="'basket-'~basketId")
-     * @Tag(expression="'basketItem-'~itemId")
+     * @Tag(expression="'basketItem-'~basketItemId")
      *
      * @param $basketId
      * @param $basketItemId
@@ -98,7 +102,8 @@ class BasketItemController extends FOSRestController implements ClassResourceInt
             throw $this->createNotFoundException('BasketItem not found');
         }
 
-        $em->remove($basketItem);
+        $basketItem->setIsDeleted(true);
+        $em->persist($basketItem);
         $em->flush();
 
         return $this->view(null, Response::HTTP_NO_CONTENT);

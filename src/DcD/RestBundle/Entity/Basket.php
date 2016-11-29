@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Basket
  *
- * @ORM\Table(name="basket")
+ * @ORM\Table(name="basket", indexes={@ORM\Index(name="is_deleted_idx", columns={"is_deleted"})})
  * @ORM\Entity(repositoryClass="DcD\RestBundle\Repository\BasketRepository")
  * @UniqueEntity("uuid")
  */
@@ -43,6 +43,27 @@ class Basket
      * @Assert\NotBlank(message="uuid is missing")
      */
     private $uuid;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", nullable=false)
+     */
+    private $isDeleted = false;
+
+    /**
+     * @var $createdAt
+     *
+     * @ORM\Column(type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @var $deletedAt;
+     *
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $deletedAt;
 
     /**
      * @OneToMany(targetEntity="BasketItem", mappedBy="basket", fetch="EXTRA_LAZY")
@@ -113,6 +134,7 @@ class Basket
     public function __construct()
     {
         $this->basketItems = new ArrayCollection();
+        $this->setCreatedAt(new \DateTime("now"));
     }
 
     /**
@@ -147,5 +169,78 @@ class Basket
     public function getBasketItems()
     {
         return $this->basketItems;
+    }
+
+    /**
+     * Set isDeleted
+     *
+     * @param boolean $isDeleted
+     *
+     * @return Basket
+     */
+    public function setDeleted($isDeleted)
+    {
+        $this->isDeleted = $isDeleted;
+        $this->setDeletedAt(new \DateTime("now"));
+
+        return $this;
+    }
+
+    /**
+     * Get isDeleted
+     *
+     * @return boolean
+     */
+    public function isDeleted()
+    {
+        return $this->isDeleted;
+    }
+
+    /**
+     * Set createdAt
+     *
+     * @param \DateTime $createdAt
+     *
+     * @return Basket
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * Set deletedAt
+     *
+     * @param \DateTime $deletedAt
+     *
+     * @return Basket
+     */
+    public function setDeletedAt($deletedAt)
+    {
+        $this->deletedAt = $deletedAt;
+
+        return $this;
+    }
+
+    /**
+     * Get deletedAt
+     *
+     * @return \DateTime
+     */
+    public function getDeletedAt()
+    {
+        return $this->deletedAt;
     }
 }

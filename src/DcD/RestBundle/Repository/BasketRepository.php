@@ -25,7 +25,9 @@ class BasketRepository extends \Doctrine\ORM\EntityRepository
                b, bi
             FROM 
               RestBundle:Basket b 
-              LEFT JOIN b.basketItems bi  
+              LEFT JOIN b.basketItems bi
+            WHERE
+              b.isDeleted = 0
             
          ')
             ->getResult(AbstractQuery::HYDRATE_ARRAY);
@@ -47,8 +49,10 @@ class BasketRepository extends \Doctrine\ORM\EntityRepository
               RestBundle:Basket b 
               LEFT JOIN b.basketItems bi  
             WHERE 
-              b.id = :id
+              b.id = :id AND            
+              b.isDeleted = 0
          ')
             ->setParameter('id', $basketId)->getOneOrNullResult(AbstractQuery::HYDRATE_ARRAY);
     }
+
 }

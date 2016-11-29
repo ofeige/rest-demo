@@ -118,8 +118,9 @@ class BasketController extends FOSRestController implements ClassResourceInterfa
     {
         $em = $this->getDoctrine()->getManager();
         $basket = $em->getRepository('RestBundle:Basket')->find($id);
+        $basket->setDeleted(true);
 
-        $em->remove($basket);
+        $em->persist($basket);
         $em->flush();
 
         return $this->view(null, Response::HTTP_NO_CONTENT);
