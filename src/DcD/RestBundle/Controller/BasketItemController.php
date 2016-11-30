@@ -76,8 +76,6 @@ class BasketItemController extends FOSRestController implements ClassResourceInt
             $em->persist( $basketItem );
             $em->flush();
 
-            //avoid lazy loading
-            //$basketItem->setBasket(NULL);
             return $this->view($this->cgetAction($basketItem->getBasket()->getId()), Response::HTTP_CREATED);
         }
 
@@ -102,7 +100,7 @@ class BasketItemController extends FOSRestController implements ClassResourceInt
             throw $this->createNotFoundException('BasketItem not found');
         }
 
-        $basketItem->setIsDeleted(true);
+        $basketItem->setDeleted(true);
         $em->persist($basketItem);
         $em->flush();
 
