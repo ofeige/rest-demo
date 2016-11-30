@@ -127,7 +127,7 @@ class BasketItem
      *
      * @return BasketItem
      */
-    public function setIsDeleted($isDeleted)
+    public function setDeleted($isDeleted)
     {
         $this->isDeleted = $isDeleted;
         $this->setDeletedAt(new \DateTime("now"));
@@ -140,7 +140,7 @@ class BasketItem
      *
      * @return boolean
      */
-    public function getIsDeleted()
+    public function isDeleted()
     {
         return $this->isDeleted;
     }
