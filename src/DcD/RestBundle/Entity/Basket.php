@@ -183,6 +183,10 @@ class Basket
         $this->isDeleted = $isDeleted;
         $this->setDeletedAt(new \DateTime("now"));
 
+        foreach ($this->basketItems as $basketItem) {
+            $basketItem->setDeleted(true);
+        }
+
         return $this;
     }
 
