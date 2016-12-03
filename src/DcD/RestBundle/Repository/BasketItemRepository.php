@@ -30,6 +30,7 @@ class BasketItemRepository extends EntityRepository
               JOIN bi.basket b
             WHERE 
               bi.basket = :id AND 
+              bi.isDeleted = 0 AND 
               b.isDeleted = 0
          ')
             ->setParameter('id', $basketId)

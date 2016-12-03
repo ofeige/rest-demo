@@ -205,9 +205,7 @@ class BasketItemControllerTest extends WebTestCase
         $basketItems = json_decode($client->getResponse()->getContent(), true);
         $this->assertJsonResponse($client->getResponse(), 200);
         $this->assertCount(1, $basketItems);
-        $this->assertEquals($basketItems, $basketItem);
-
-        print_r($basketItems);
+        $this->assertEquals($basketItems[0], $basketItem[1]);
 
         return $info;
     }
