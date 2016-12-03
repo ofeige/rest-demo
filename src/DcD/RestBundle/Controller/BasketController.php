@@ -5,10 +5,14 @@ namespace DcD\RestBundle\Controller;
 use DcD\RestBundle\Entity\Basket;
 use DcD\RestBundle\Form\Type\BasketType;
 use FOS\HttpCacheBundle\Configuration\Tag;
+use FOS\RestBundle\Controller\Annotations\QueryParam;
+use FOS\RestBundle\Controller\Annotations\RequestParam;
 use FOS\RestBundle\Controller\FOSRestController;
+use FOS\RestBundle\Request\ParamFetcher;
 use FOS\RestBundle\Routing\ClassResourceInterface;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -124,5 +128,17 @@ class BasketController extends FOSRestController implements ClassResourceInterfa
         $em->flush();
 
         return $this->view(null, Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * @Rest\View()
+     * @QueryParam(name="mergeToBasketId", requirements="\d+", allowBlank=false, strict=true, nullable=false, description="List of ids")
+     */
+    public function mergeAction(ParamFetcher $paramFetcher, $id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $basket = $em->getRepository('RestBundle:Basket')->merge($id, $paramFetcher->get('mergeToBasketId'));
+
+        return $this->view($this->getAction($paramFetcher->get('mergeToBasketId')), Response::HTTP_ACCEPTED);
     }
 }

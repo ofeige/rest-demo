@@ -1,7 +1,9 @@
 <?php
 
 namespace DcD\RestBundle\Repository;
+use DcD\RestBundle\Entity\EntityNotFoundException;
 use Doctrine\ORM\AbstractQuery;
+use Doctrine\ORM\NoResultException;
 
 /**
  * BasketRepository
@@ -55,4 +57,33 @@ class BasketRepository extends \Doctrine\ORM\EntityRepository
             ->setParameter('id', $basketId)->getOneOrNullResult(AbstractQuery::HYDRATE_ARRAY);
     }
 
+    public function merge($mergeId, $id)
+    {
+        // test that basket exists and is'nt deleted
+        if(empty($this->getBasket($mergeId)))
+        {
+            throw new EntityNotFoundException('Basket not found with id: '.$mergeId);
+        }
+
+        // test that basket exists and is'nt deleted
+        if(empty($this->getBasket($id))) {
+            throw new EntityNotFoundException('Basket not found with id: '.$id);
+        }
+
+        // merge all basketItems to other basket
+        $em = $this->getEntityManager();
+        $em->beginTransaction();
+        $em->createQuery('UPDATE RestBundle:BasketItem bi SET bi.basket=:id WHERE bi.basket=:mergeId')
+            ->setParameter('id', $id)
+            ->setParameter('mergeId', $mergeId)
+            ->getOneOrNullResult();
+
+        // delete merged basket
+        $basket = $this->find($mergeId);
+        $basket->setDeleted(true);
+        $em->persist($basket);
+        $em->flush();
+
+        $em->commit(AbstractQuery::HYDRATE_ARRAY);
+    }
 }
