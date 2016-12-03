@@ -3,6 +3,7 @@
 namespace Tests\RestBundle\Controller;
 
 use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -30,9 +31,8 @@ class BasketControllerTest extends WebTestCase
 
     /**
      * @depends testPost
-     *
-     * @param array $content
-     * @return array|mixed
+     * @param array $basket
+     * @return array
      */
     public function testPut(array $basket)
     {
@@ -66,6 +66,8 @@ class BasketControllerTest extends WebTestCase
 
     /**
      * @depends testPut
+     * @param array $basket
+     * @return array
      */
     public function testGet(array $basket)
     {
@@ -100,7 +102,7 @@ class BasketControllerTest extends WebTestCase
 
     /**
      * @depends testGet
-     * @param array $data
+     * @param array $oldBasket
      * @return array
      */
     public function testMerge(array $oldBasket)
@@ -139,6 +141,8 @@ class BasketControllerTest extends WebTestCase
 
     /**
      * @depends testMerge
+     * @param array $basket
+     * @return array
      */
     public function testCget(array $basket)
     {
@@ -170,7 +174,7 @@ class BasketControllerTest extends WebTestCase
 
     /**
      * @depends testCget
-     * @param $content
+     * @param array $basket
      */
     public function testDelete(array $basket)
     {
@@ -178,22 +182,23 @@ class BasketControllerTest extends WebTestCase
         $client->setServerParameter('HTTP_HOST', 'rest-demo:8080');
 
         $client->request('DELETE', '/baskets/'.$basket['id']);
-        $content = json_decode($client->getResponse()->getContent(), true);
         $this->assertJsonResponse($client->getResponse(), 204);
 
         // test that basket is really deleted
         $client = static::createClient();
         $client->setServerParameter('HTTP_HOST', 'rest-demo:8080');
         $client->request('GET', '/baskets/'.$basket['id']);
-        $content = json_decode($client->getResponse()->getContent(), true);
         $this->assertJsonResponse($client->getResponse(), 404);
 
         // test that basketItem is deleted too
         $client = static::createClient();
         $client->setServerParameter('HTTP_HOST', 'rest-demo:8080');
         $client->request('GET', sprintf('/baskets/%d/items/%d', $basket['id'], $basket['basketItems'][0]['id']));
-        $content = json_decode($client->getResponse()->getContent(), true);
         $this->assertJsonResponse($client->getResponse(), 404);
+
+        $doctrine = static::$kernel->getContainer()->get('doctrine');
+        $basketItem = $doctrine->getManager()->getRepository('RestBundle:BasketItem')->find($basket['basketItems'][0]['id']);
+        $this->assertTrue($basketItem->isDeleted(), 'Deleted BasketItem is\'nt deleted in the DB');
     }
 
 
@@ -230,7 +235,7 @@ class BasketControllerTest extends WebTestCase
         );
     }
 
-    protected function createBasket($userId, Uuid $uuid)
+    protected function createBasket($userId, UuidInterface $uuid)
     {
         $client = static::createClient([], ['HTTP_HOST' => 'rest-demo:8080']);
         $client->setServerParameter('CONTENT_TYPE', 'application/json');
