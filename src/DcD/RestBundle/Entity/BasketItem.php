@@ -32,7 +32,7 @@ class BasketItem
     /**
      * @var array
      *
-     * @ORM\Column(name="info", type="json_array")
+     * @ORM\Column(name="info", type="text")
      */
     private $info;
 
